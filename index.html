@@ -157,6 +157,29 @@ const JOKES = [
   'Why do plants hate math? It gives them square roots! 🌱',
   'What do you call friends who love math? Algebros! 🤝',
   'Why is 10 scared of 11? Because 11 is bigger and always in the teens! 😄',
+  'Why did the student do multiplication on the floor? The teacher told them not to use tables! 🪑',
+  'What is a math teacher’s favorite sum-mer activity? Counting waves! 🌊',
+  'Why was the equal sign so humble? It knew it was not less than or greater than anyone else! ⚖️',
+  'What kind of tree fits in your hand? A palm tree! 🌴',
+  'Why did the number 4 skip lunch? It already had 8! 🍽️',
+  'What did one triangle say to the other? You are looking sharp! 🔺',
+  'Why did the circle go to school? It wanted to become well-rounded! ⭕',
+  'What do you call a number that cannot sit still? A roamin’ numeral! 🏃',
+  'Why did the fraction feel nervous? It was going through a rough patch! 😅',
+  'What did the calculator say to the student? You can count on me! 🧮',
+  'Why did the picture go to math class? It wanted to learn how to draw conclusions! 🖼️',
+  'What is a snake’s favorite subject? Hiss-tory, but it likes adders too! 🐍',
+  'Why did the student bring a ladder to math class? To reach the higher numbers! 🪜',
+  'What do you call a number that likes to help? A kind-digit! 😊',
+  'Why was the math worksheet so calm? It knew how to stay in its proper place! 📄',
+  'What did the big flower say to the little flower? Hi, bud! 🌼',
+  'Why did the two fours skip dinner? They already ate! 🍽️',
+  'What is a math book’s favorite animal? A porcupine, because it has lots of points! 🦔',
+  'Why did the student write with a broken pencil? It was pointless! ✏️',
+  'What is a pirate’s favorite number? The one that says “arrr!” 🏴‍☠️',
+  'Why did the clock get good at math? It spent a lot of time practicing! 🕒',
+  'What do you call a number that tells jokes? A funny figure! 😄',
+  'Why did the math teacher wear sunglasses? The students were so bright! 😎',
 ];
 const TIPS = [
   '💡 Swap the numbers, same answer: 3 × 7 = 7 × 3',
@@ -168,7 +191,7 @@ const TIPS = [
 
 // ---------- storage (this device only) ----------
 function defaults() {
-  return {name: '', level: 1, sound: true, timer: {}, stars: 0, best: {}, badges: {}, done: {}, bestStreak: 0};
+  return {name: '', level: 1, sound: true, timer: {}, stars: 0, best: {}, badges: {}, done: {}, bestStreak: 0, recentJokes: []};
 }
 function load() {
   const s = defaults();
@@ -177,6 +200,7 @@ function load() {
     if (saved && typeof saved === 'object') Object.assign(s, saved);
   } catch (e) { /* storage unavailable: play without saving */ }
   for (const k of ['timer', 'best', 'badges', 'done']) if (!s[k] || typeof s[k] !== 'object') s[k] = {};
+  s.recentJokes = Array.isArray(s.recentJokes) ? s.recentJokes.filter(joke => typeof joke === 'string').slice(-20) : [];
   s.level = Math.min(4, Math.max(1, parseInt(s.level, 10) || 1));
   s.name = String(s.name || '').slice(0, 20);
   s.stars = Number(s.stars) || 0;
@@ -191,6 +215,14 @@ const $ = s => document.querySelector(s);
 const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function pickJoke() {
+  const recent = new Set(S.recentJokes);
+  const available = JOKES.filter(joke => !recent.has(joke));
+  const joke = pick(available.length ? available : JOKES);
+  S.recentJokes = [...S.recentJokes, joke].slice(-20);
+  save();
+  return joke;
+}
 const fmt = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 function el(tag, props = {}, ...kids) {
   const e = document.createElement(tag);
@@ -360,7 +392,7 @@ function renderHome() {
     const joke = el('div', {style: 'margin-top:8px;font-size:17px;color:#6a1b9a'});
     bubble = el('div', {class: 'bubble'}, `Hi ${nm()}! Ready to earn some stars today? ⭐`, joke,
       el('div', {class: 'row'},
-        el('button', {class: 'btn small', style: 'background:#7e57c2', onclick: () => { joke.textContent = pick(JOKES); }}, '😂 Tell me a joke'),
+        el('button', {class: 'btn small', style: 'background:#7e57c2', onclick: () => { joke.textContent = pickJoke(); }}, '😂 Tell me a joke'),
         el('button', {class: 'btn small', style: 'background:#90a4ae', onclick: () => { S.name = ''; save(); renderHome(); }}, '✏️ Change name')));
   }
   root.append(el('div', {class: 'card hello'}, el('div', {class: 'mascot'}, '🦉'), bubble));
